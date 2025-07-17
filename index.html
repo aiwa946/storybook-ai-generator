@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI兒童繪本生成器</title>
+  <style>
+    body {
+      font-family: "Noto Sans TC", sans-serif;
+      background: #f4f7fb;
+      padding: 20px;
+    }
+    h1, h2, h3 {
+      color: #2c3e50;
+    }
+    .section {
+      margin-bottom: 30px;
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+    .tag-group {
+      margin: 10px 0;
+    }
+    .tag {
+      display: inline-block;
+      padding: 8px 14px;
+      margin: 5px;
+      border: 1px solid #ccc;
+      border-radius: 20px;
+      cursor: pointer;
+      background: #fff;
+      transition: all 0.2s ease-in-out;
+    }
+    .tag.selected {
+      background: #2ecc71;
+      color: white;
+      border-color: #2ecc71;
+    }
+    textarea {
+      width: 100%;
+      height: 120px;
+      padding: 10px;
+      font-size: 14px;
+      margin-top: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+    button {
+      margin-top: 10px;
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      background: #3498db;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #2980b9;
+    }
+  </style>
+</head>
+<body>
+  <h1>AI兒童繪本生成器</h1>
+
+  <div class="section" id="step1">
+    <h2>Step 1：選擇故事元素</h2>
+    <div>
+      <strong>寓意：</strong>
+      <div class="tag-group" data-group="theme">
+        <span class="tag">勇氣</span>
+        <span class="tag">友情</span>
+        <span class="tag">冒險</span>
+        <span class="tag">親情</span>
+        <span class="tag">自信</span>
+        <span class="tag">幽默</span>
+      </div>
+      <strong>地點：</strong>
+      <div class="tag-group" data-group="place">
+        <span class="tag">村莊</span>
+        <span class="tag">山上</span>
+        <span class="tag">森林</span>
+        <span class="tag">異世界</span>
+        <span class="tag">天空</span>
+      </div>
+      <strong>角色：</strong>
+      <div class="tag-group" data-group="character">
+        <span class="tag">動物</span>
+        <span class="tag">玩具</span>
+        <span class="tag">精靈</span>
+        <span class="tag">怪獸</span>
+      </div>
+      <strong>敘事視角：</strong>
+      <div class="tag-group" data-group="narrator">
+        <span class="tag">第一人稱</span>
+        <span class="tag">第二人稱</span>
+        <span class="tag">第三人稱</span>
+        <span class="tag">旁白式</span>
+      </div>
+      <strong>時代背景：</strong>
+      <div class="tag-group" data-group="era">
+        <span class="tag">現代</span>
+        <span class="tag">古代</span>
+        <span class="tag">未來</span>
+        <span class="tag">架空世界</span>
+      </div>
+      <strong>結局風格：</strong>
+      <div class="tag-group" data-group="ending">
+        <span class="tag">大團圓</span>
+        <span class="tag">出乎意料</span>
+        <span class="tag">含淚微笑</span>
+        <span class="tag">開放式結局</span>
+        <span class="tag">反轉結局</span>
+        <span class="tag">幸福結局</span>
+      </div>
+      <strong>故事長度：</strong>
+      <div class="tag-group" data-group="length">
+        <span class="tag">短篇</span>
+        <span class="tag">中篇</span>
+        <span class="tag">長篇</span>
+      </div>
+      <strong>對象年齡層：</strong>
+      <div class="tag-group" data-group="age">
+        <span class="tag">1~3歲</span>
+        <span class="tag">3~5歲</span>
+        <span class="tag">6~8歲</span>
+        <span class="tag">9~12歲</span>
+        <span class="tag">親子共讀</span>
+      </div>
+      <strong>故事字數：</strong>
+      <div class="tag-group" data-group="wordcount">
+        <span class="tag">50字</span>
+        <span class="tag">100字</span>
+        <span class="tag">150字</span>
+        <span class="tag">200字</span>
+        <span class="tag">300字</span>
+        <span class="tag">500字</span>
+        <span class="tag">1000字</span>
+      </div>
+    </div>
+    <h3>📝 自動生成的故事提示語：</h3>
+    <textarea id="promptOutput" readonly></textarea>
+    <button onclick="generatePrompt()">✨ 生成故事提示語</button>
+  </div>
+
+  <div class="section" id="step2">
+    <h2>Step 2：ChatGPT腳本產生及送出：</h2>
+    <p><strong>📘 要送給 ChatGPT 的腳本內容：</strong></p>
+    <textarea id="storyScript" placeholder="這裡會自動帶入上方提示語，可手動調整..."></textarea>
+    <button onclick="generateStory()">📤 送出腳本生成故事</button>
+    <h3>📖 生成的故事內容：</h3>
+    <textarea id="storyOutput" placeholder="這裡將顯示模擬生成的故事內容..."></textarea>
+  </div>
+
+  <script>
+    const tags = document.querySelectorAll('.tag');
+    tags.forEach(tag => {
+      tag.addEventListener('click', () => {
+        tag.classList.toggle('selected');
+      });
+    });
+
+    function generatePrompt() {
+      const selected = document.querySelectorAll('.tag.selected');
+      const keywords = Array.from(selected).map(tag => tag.textContent);
+      const prompt = keywords.join(', ');
+      document.getElementById('promptOutput').value = prompt;
+      document.getElementById('storyScript').value = `請用以下關鍵字幫我寫一則兒童繪本故事：${prompt}`;
+    }
+
+    function generateStory() {
+      const script = document.getElementById('storyScript').value;
+      const mockStory = `（模擬故事產出）\n從前從前，有個充滿${script}的故事世界...\n主角踏上冒險旅程，經歷挑戰，最終迎來感人的結局。`;
+      document.getElementById('storyOutput').value = mockStory;
+    }
+  </script>
+</body>
+</html>
